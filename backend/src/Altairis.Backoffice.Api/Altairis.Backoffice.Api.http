@@ -1,0 +1,5 @@
+@Altairis.Backoffice.Api_HostAddress = http://localhost:5012
+
+GET {{Altairis.Backoffice.Api_HostAddress}}/health
+
+###

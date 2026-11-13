@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Altairis.Backoffice.Domain\Altairis.Backoffice.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

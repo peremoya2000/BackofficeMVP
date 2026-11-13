@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Altairis.Backoffice.Api/Altairis.Backoffice.Api.csproj" />
+    <Project Path="src/Altairis.Backoffice.Contracts/Altairis.Backoffice.Contracts.csproj" />
+    <Project Path="src/Altairis.Backoffice.Domain/Altairis.Backoffice.Domain.csproj" />
+    <Project Path="src/Altairis.Backoffice.Infrastructure/Altairis.Backoffice.Infrastructure.csproj" />
+  </Folder>
+</Solution>
