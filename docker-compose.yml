@@ -1,0 +1,49 @@
+name: altairis-backoffice
+
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      # Demo-only credentials, inline so the stack starts without a .env file.
+      POSTGRES_DB: altairis_backoffice
+      POSTGRES_USER: altairis
+      POSTGRES_PASSWORD: altairis_demo
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --username=altairis --dbname=altairis_backoffice"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./backend
+    environment:
+      ConnectionStrings__Backoffice: Host=db;Port=5432;Database=altairis_backoffice;Username=altairis;Password=altairis_demo
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--output", "/dev/null", "http://localhost:8080/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 120s
+
+  web:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  db-data:

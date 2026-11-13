@@ -12,6 +12,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/api/health");
 
 app.Run();
