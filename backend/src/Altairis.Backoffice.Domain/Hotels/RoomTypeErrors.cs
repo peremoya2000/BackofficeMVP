@@ -4,6 +4,10 @@ namespace Altairis.Backoffice.Domain.Hotels;
 
 public static class RoomTypeErrors
 {
+    public static Error NotFound(Guid roomTypeId) => Error.NotFound(
+        "room_type.not_found",
+        $"No existe ningún tipo de habitación con el id {roomTypeId}.");
+
     public static readonly Error NameRequired = Error.Validation(
         "room_type.name_required",
         "El nombre del tipo de habitación es obligatorio.");

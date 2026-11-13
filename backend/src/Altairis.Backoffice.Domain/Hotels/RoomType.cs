@@ -2,6 +2,10 @@ using Altairis.Backoffice.Domain.Common;
 
 namespace Altairis.Backoffice.Domain.Hotels;
 
+/// <summary>
+/// A kind of room that one hotel sells (e.g. "Doble Superior Vista Mar"), grouped across hotels by <see cref="RoomCategory"/>.
+/// How many of it can be sold, and at what price, is set per night in <see cref="Inventory.InventoryDay"/>.
+/// </summary>
 public sealed class RoomType
 {
     public const int NAME_MAX_LENGTH = 100;

@@ -6,4 +6,6 @@ public static class OperationsCalendar
 
     public static DateOnly DateOf(DateTime utcDateTime) =>
         DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, OperationsTimeZone));
+
+    public static DateOnly Today(TimeProvider timeProvider) => DateOf(timeProvider.GetUtcNow().UtcDateTime);
 }

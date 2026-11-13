@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Json;
 using Altairis.Backoffice.Contracts.Common;
 using Altairis.Backoffice.Contracts.Hotels;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Altairis.Backoffice.Api.IntegrationTests.Hotels;
 
@@ -43,7 +42,7 @@ public sealed class HotelsApiTests(BackofficeApiFactory factory)
         HttpResponseMessage response = await _client.PostAsJsonAsync(HOTELS_URL, request, Cancellation);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equal("hotel.country_code_invalid", await ReadErrorCodeAsync(response));
+        Assert.Equal("hotel.country_code_invalid", await response.ReadErrorCodeAsync());
     }
 
     [Fact]
@@ -53,7 +52,7 @@ public sealed class HotelsApiTests(BackofficeApiFactory factory)
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
-        Assert.Equal("hotel.not_found", await ReadErrorCodeAsync(response));
+        Assert.Equal("hotel.not_found", await response.ReadErrorCodeAsync());
     }
 
     [Fact]
@@ -113,13 +112,6 @@ public sealed class HotelsApiTests(BackofficeApiFactory factory)
         new(name, Stars: 3, Address: "Calle de prueba 1", city, countryCode, ContactEmail: null, ContactPhone: null);
 
     private static string NewToken() => Guid.NewGuid().ToString("N")[..12];
-
-    private static async Task<string?> ReadErrorCodeAsync(HttpResponseMessage response)
-    {
-        ProblemDetails? problem = await response.Content.ReadFromJsonAsync<ProblemDetails>(Cancellation);
-        Assert.NotNull(problem);
-        return problem.Extensions["code"]?.ToString();
-    }
 
     private async Task<HotelResponse> CreateHotelAsync(CreateHotelRequest request)
     {
