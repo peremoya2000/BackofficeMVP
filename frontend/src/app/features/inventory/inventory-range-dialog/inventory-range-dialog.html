@@ -1,0 +1,54 @@
+<h2 mat-dialog-title>Editar inventario</h2>
+
+<form [formGroup]="form" (ngSubmit)="save()">
+  <mat-dialog-content class="fields">
+    <mat-form-field>
+      <mat-label>Tipo de habitación</mat-label>
+      <mat-select formControlName="roomTypeId">
+        @for (roomType of data.roomTypes; track roomType.id) {
+          <mat-option [value]="roomType.id">{{ roomType.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Noches (ambas incluidas)</mat-label>
+      <mat-date-range-input [rangePicker]="picker" [min]="today">
+        <input matStartDate formControlName="from" placeholder="Desde" />
+        <input matEndDate formControlName="to" placeholder="Hasta" />
+      </mat-date-range-input>
+      <mat-datepicker-toggle matIconSuffix [for]="picker" />
+      <mat-date-range-picker #picker />
+      <mat-hint>dd/mm/aaaa – dd/mm/aaaa</mat-hint>
+      <mat-error>Indica un rango de fechas válido, desde hoy.</mat-error>
+    </mat-form-field>
+
+    <p class="fields__note">Los campos vacíos mantienen el valor actual de cada noche.</p>
+
+    <mat-form-field>
+      <mat-label>Cupo</mat-label>
+      <input matInput type="number" min="0" formControlName="totalRooms" />
+      <span matTextSuffix>habitaciones</span>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Precio por noche</mat-label>
+      <input matInput type="number" min="0" step="0.01" formControlName="price" />
+      <span matTextSuffix>{{ data.currency }}</span>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Venta</mat-label>
+      <mat-select formControlName="salesClosed">
+        <mat-option [value]="null">Sin cambios</mat-option>
+        <mat-option [value]="false">Abierta</mat-option>
+        <mat-option [value]="true">Cerrada</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button matButton type="button" mat-dialog-close>Cancelar</button>
+    <button matButton="filled" type="submit" [disabled]="form.invalid || saving()">Aplicar</button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,93 @@
+@if (shownCalendar(); as view) {
+  <app-page-header [title]="'Inventario · ' + view.hotelName" [backLink]="'/hotels/' + id()">
+    <button matButton="filled" [disabled]="rows().length === 0" (click)="openEditor()">
+      <mat-icon>edit_calendar</mat-icon>
+      Editar rango
+    </button>
+  </app-page-header>
+
+  <div class="toolbar">
+    <button matIconButton aria-label="Semana anterior" (click)="shift(-stepDays)">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <button matButton="outlined" (click)="showToday()">Hoy</button>
+    <button matIconButton aria-label="Semana siguiente" (click)="shift(stepDays)">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+    <div class="toolbar__range">
+      {{ view.from | date: 'd MMM' }} – {{ view.to | date: 'd MMM y' }}
+    </div>
+  </div>
+
+  <div class="grid-container">
+    <mat-progress-bar mode="indeterminate" [class.hidden]="!calendar.isLoading()" />
+
+    <table class="grid">
+      <thead>
+        <tr>
+          <th class="grid__room-type">Tipo de habitación</th>
+          @for (column of columns(); track column.key) {
+            <th
+              class="grid__day"
+              [class.grid__day--weekend]="column.weekend"
+              [class.grid__day--past]="column.past"
+            >
+              <span>{{ column.date | date: 'EEE' }}</span>
+              <span>{{ column.date | date: column.dayFormat }}</span>
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.roomTypeId) {
+          <tr>
+            <th class="grid__room-type" scope="row">{{ row.name }}</th>
+            @for (cell of row.cells; track cell.column.key) {
+              <td>
+                <button
+                  type="button"
+                  class="cell"
+                  [class]="'cell--' + cell.status"
+                  [class.cell--past]="cell.column.past"
+                  [disabled]="cell.column.past"
+                  [matTooltip]="cell.tooltip"
+                  (click)="openEditor(row.roomTypeId, cell.column.date)"
+                >
+                  @if (cell.day; as day) {
+                    <span class="cell__rooms">{{ cell.available }}/{{ day.totalRooms }}</span>
+                    <span>{{ day.price | currency: view.currency : 'symbol' : '1.0-0' }}</span>
+                  } @else {
+                    —
+                  }
+                </button>
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td class="no-data" [attr.colspan]="columns().length + 1">
+              Este hotel aún no tiene tipos de habitación.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="legend">
+    <li><span class="legend__swatch cell--open"></span>Disponible</li>
+    <li><span class="legend__swatch cell--high"></span>Ocupación ≥ 70 %</li>
+    <li><span class="legend__swatch cell--sold-out"></span>Completo</li>
+    <li><span class="legend__swatch cell--closed"></span>Venta cerrada</li>
+    <li><span class="legend__swatch cell--none"></span>Sin cupo</li>
+    <li class="legend__help">
+      Cada celda muestra habitaciones libres / cupo y el precio por noche. Haz clic en una para
+      editarla.
+    </li>
+  </ul>
+} @else if (calendar.isLoading()) {
+  <mat-progress-bar mode="indeterminate" />
+} @else {
+  <app-page-header title="Inventario no disponible" backLink="/hotels" />
+  <p>No se ha podido cargar el inventario de este hotel.</p>
+}

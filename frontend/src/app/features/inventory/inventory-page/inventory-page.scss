@@ -1,0 +1,151 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.toolbar__range {
+  margin-left: 12px;
+  font: var(--mat-sys-title-medium);
+}
+
+.grid-container {
+  overflow-x: auto;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.grid {
+  width: 100%;
+  border-collapse: collapse;
+  font: var(--mat-sys-body-small);
+
+  th,
+  td {
+    padding: 2px;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+}
+
+.grid .grid__room-type {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 180px;
+  padding: 0 12px;
+  text-align: left;
+  font: var(--mat-sys-title-small);
+  background: var(--mat-sys-surface);
+}
+
+.grid__day {
+  font-weight: 400;
+  color: var(--mat-sys-on-surface-variant);
+
+  span {
+    display: block;
+  }
+}
+
+.grid__day--weekend {
+  font-weight: 600;
+  color: var(--mat-sys-on-surface);
+}
+
+.grid__day--past {
+  opacity: 0.5;
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 52px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: var(--mat-sys-corner-extra-small);
+  font: inherit;
+  color: var(--status-text);
+  background: var(--status-background);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    outline: 2px solid var(--mat-sys-primary);
+  }
+}
+
+.cell__rooms {
+  font-weight: 600;
+}
+
+.cell--past {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.cell--open {
+  --status-background: #d4eed9;
+  --status-text: #1d5b2a;
+}
+
+.cell--high {
+  --status-background: #fde3a7;
+  --status-text: #6b4500;
+}
+
+.cell--sold-out {
+  --status-background: #f6c9c5;
+  --status-text: #8c1d18;
+}
+
+.cell--closed {
+  --status-background: repeating-linear-gradient(-45deg, #dcdcdc 0 4px, #ececec 4px 8px);
+  --status-text: #555;
+}
+
+.cell--none {
+  --status-background: var(--mat-sys-surface-container);
+  --status-text: var(--mat-sys-outline);
+}
+
+.no-data {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--mat-sys-on-surface-variant);
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+.legend__swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: var(--status-background);
+}
+
+.legend__help {
+  flex-basis: 100%;
+}

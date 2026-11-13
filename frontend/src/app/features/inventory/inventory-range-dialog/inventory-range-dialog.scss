@@ -1,0 +1,10 @@
+.fields {
+  display: flex;
+  flex-direction: column;
+  width: min(400px, 80vw);
+}
+
+.fields__note {
+  margin: 8px 0 16px;
+  color: var(--mat-sys-on-surface-variant);
+}

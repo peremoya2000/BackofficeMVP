@@ -1,6 +1,11 @@
 @if (hotel.hasValue()) {
   @let details = hotel.value();
-  <app-page-header [title]="details.name" backLink="/hotels" />
+  <app-page-header [title]="details.name" backLink="/hotels">
+    <a matButton="filled" routerLink="inventory">
+      <mat-icon>calendar_month</mat-icon>
+      Inventario
+    </a>
+  </app-page-header>
 
   <mat-card appearance="outlined">
     <mat-card-content>
