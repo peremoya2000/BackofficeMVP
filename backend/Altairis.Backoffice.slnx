@@ -6,4 +6,7 @@
     <Project Path="src/Altairis.Backoffice.Domain/Altairis.Backoffice.Domain.csproj" />
     <Project Path="src/Altairis.Backoffice.Infrastructure/Altairis.Backoffice.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Altairis.Backoffice.Domain.Tests/Altairis.Backoffice.Domain.Tests.csproj" />
+  </Folder>
 </Solution>
