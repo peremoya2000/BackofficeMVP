@@ -1,0 +1,38 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs and tools
+.vs/
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.user
+*.suo
+*.DotSettings.user
+.claude/settings.local.json
+
+# .NET build output
+[Bb]in/
+[Oo]bj/
+
+# Node / Angular
+node_modules/
+dist/
+out-tsc/
+.angular/
+
+# Test results and coverage
+TestResults/
+coverage/
+
+# Logs
+*.log
+
+# Local environment overrides (docker-compose must work without them)
+.env
+.env.*
+!.env.example
