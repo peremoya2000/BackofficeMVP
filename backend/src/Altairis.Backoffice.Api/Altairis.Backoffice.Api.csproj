@@ -2,9 +2,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
+    <PackageReference Include="Scalar.AspNetCore" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Altairis.Backoffice.Application\Altairis.Backoffice.Application.csproj" />
     <ProjectReference Include="..\Altairis.Backoffice.Contracts\Altairis.Backoffice.Contracts.csproj" />
     <ProjectReference Include="..\Altairis.Backoffice.Domain\Altairis.Backoffice.Domain.csproj" />
     <ProjectReference Include="..\Altairis.Backoffice.Infrastructure\Altairis.Backoffice.Infrastructure.csproj" />

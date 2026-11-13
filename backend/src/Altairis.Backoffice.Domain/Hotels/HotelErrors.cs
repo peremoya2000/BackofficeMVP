@@ -4,6 +4,10 @@ namespace Altairis.Backoffice.Domain.Hotels;
 
 public static class HotelErrors
 {
+    public static Error NotFound(Guid hotelId) => Error.NotFound(
+        "hotel.not_found",
+        $"No existe ningún hotel con el id {hotelId}.");
+
     public static readonly Error NameRequired = Error.Validation(
         "hotel.name_required",
         "El nombre del hotel es obligatorio.");
