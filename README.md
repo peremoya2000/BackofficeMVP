@@ -20,7 +20,12 @@ Cuando los tres servicios aparezcan como `healthy`, abre **http://localhost:8080
 
 Las credenciales de la base de datos están en `docker-compose.yml` para que todo arranque sin configuración adicional. **Son solo para la demo.**
 
-Al arrancar, la API aplica las migraciones pendientes y, si la base de datos está vacía, carga 50.000 hoteles de ejemplo con sus tipos de habitación (tarda unos segundos). Los datos se generan siempre igual, así que la demo es reproducible.
+Al arrancar, la API aplica las migraciones pendientes y, si la base de datos está vacía, carga los datos de ejemplo (tarda unos segundos):
+
+- **Catálogo:** 50.000 hoteles con sus tipos de habitación, para probar la búsqueda con mucho volumen.
+- **Cartera contratada:** 40 de esos hoteles tienen cupo (inventario de 60 días atrás a 120 días adelante) y unas 9.000 reservas de agencias, touroperadores, empresas y clientes directos, con cancelaciones y noches agotadas o cerradas a la venta. Sus nombres no se repiten en el catálogo: busca, por ejemplo, «Magnolia» o «Mirabel».
+
+Los hoteles se generan siempre igual. El inventario y las reservas se calculan respecto a la fecha del primer arranque, así que la demo siempre tiene actividad en torno a hoy.
 
 Para volver a empezar con la base de datos vacía: `docker compose down -v`.
 

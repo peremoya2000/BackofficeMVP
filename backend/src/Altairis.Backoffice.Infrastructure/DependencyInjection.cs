@@ -17,6 +17,7 @@ public static class DependencyInjection
 
         services.AddScoped<DatabaseInitializer>();
         services.AddScoped<HotelSeeder>();
+        services.AddScoped<PortfolioSeeder>();
 
         return services;
     }

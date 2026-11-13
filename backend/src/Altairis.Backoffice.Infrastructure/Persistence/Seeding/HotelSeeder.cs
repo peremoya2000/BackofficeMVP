@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Altairis.Backoffice.Domain.Hotels;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
@@ -17,25 +16,22 @@ internal sealed class HotelSeeder(BackofficeDbContext dbContext, TimeProvider ti
     private const string COPY_ROOM_TYPES_SQL =
         "COPY room_types (id, hotel_id, name, category, max_occupancy) FROM STDIN (FORMAT BINARY)";
 
-    public async Task SeedAsync(CancellationToken cancellationToken)
+    public async Task<List<Hotel>> SeedAsync(CancellationToken cancellationToken)
     {
         long startedAt = Stopwatch.GetTimestamp();
         List<Hotel> hotels = SampleHotelGenerator.Generate(HOTEL_COUNT, timeProvider.GetUtcNow().UtcDateTime);
 
-        await using IDbContextTransaction transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
         NpgsqlConnection connection = (NpgsqlConnection)dbContext.Database.GetDbConnection();
         await CopyHotelsAsync(connection, hotels, cancellationToken);
         int roomTypeCount = await CopyRoomTypesAsync(connection, hotels, cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-
-        // Autovacuum refreshes planner statistics only later, and searches right after a bulk load need them.
-        await dbContext.Database.ExecuteSqlRawAsync("ANALYZE hotels, room_types;", cancellationToken);
 
         logger.LogInformation(
             "Seeded {HotelCount} hotels and {RoomTypeCount} room types in {ElapsedMs:N0} ms.",
             hotels.Count,
             roomTypeCount,
             Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds);
+
+        return hotels;
     }
 
     private static async Task CopyHotelsAsync(NpgsqlConnection connection, List<Hotel> hotels, CancellationToken cancellationToken)

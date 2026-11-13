@@ -45,6 +45,15 @@ internal static class SampleHotelGenerator
         "La Muralla", "El Faro", "Jardines", "San Miguel", "Santa Cruz", "Atlántico", "Mediterráneo", "Los Arcos", "La Ribera", "Catedral",
     ];
 
+    // Contracted hotels use theme words found nowhere else, so a search finds exactly one of each.
+    private static readonly string[] PortfolioThemes =
+    [
+        "Atalaya", "Alcázar", "Azahar", "Brisamar", "Candelaria", "Cigarral", "Duquesa", "Esmeralda", "Galeón", "Gaviota",
+        "Jacaranda", "Lavanda", "Levante", "Magnolia", "Marqués", "Mirabel", "Montecristo", "Nogal", "Oasis", "Orquídea",
+        "Perla Azul", "Quinta Rosa", "Rocamar", "Salinas", "Sirena", "Tamarindo", "Torre Blanca", "Tramontana", "Ulises", "Vela Latina",
+        "Veranda", "Vistalegre", "Zafiro", "Albatros", "Buganvilla", "Coral", "Estrella Polar", "Granados", "Hesperia", "Ínsula",
+    ];
+
     private static readonly string[] NameSuffixes = ["", "", "", "Centro", "Playa", "Puerto", "Casco Antiguo", "Estación"];
 
     private static readonly string[] Streets =
@@ -67,22 +76,24 @@ internal static class SampleHotelGenerator
         new("Suite", RoomCategory.Suite, 4),
     ];
 
+    public static int PortfolioHotelCount => PortfolioThemes.Length;
+
     public static List<Hotel> Generate(int count, DateTime nowUtc)
     {
         var random = new Random(RANDOM_SEED);
         var hotels = new List<Hotel>(count);
         for (int index = 0; index < count; index++)
         {
-            hotels.Add(GenerateHotel(random, nowUtc));
+            string theme = index < PortfolioThemes.Length ? PortfolioThemes[index] : Pick(random, NameThemes);
+            hotels.Add(GenerateHotel(random, theme, nowUtc));
         }
 
         return hotels;
     }
 
-    private static Hotel GenerateHotel(Random random, DateTime nowUtc)
+    private static Hotel GenerateHotel(Random random, string theme, DateTime nowUtc)
     {
         SampleCity city = Pick(random, Cities);
-        string theme = Pick(random, NameThemes);
         string name = $"{Pick(random, NamePrefixes)} {theme} {city.Name} {Pick(random, NameSuffixes)}".TrimEnd();
         string address = $"{Pick(random, Streets)}, {random.Next(1, MAX_STREET_NUMBER + 1)}";
         string? email = random.NextDouble() < CONTACT_EMAIL_RATIO ? $"reservas@{Slugify(theme)}-{Slugify(city.Name)}.example" : null;
