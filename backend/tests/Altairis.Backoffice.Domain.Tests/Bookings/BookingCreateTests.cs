@@ -182,4 +182,16 @@ public class BookingCreateTests
 
         Assert.True(result.IsSuccess);
     }
+
+    [Fact]
+    public void RenewReference_DrawsAnotherReferenceInTheSameFormat()
+    {
+        Booking booking = BookingTestData.Create(_roomType, _inventory).Value;
+        string firstReference = booking.Reference;
+
+        booking.RenewReference();
+
+        Assert.Matches("^ALT-[A-HJ-NP-Z2-9]{6}$", booking.Reference);
+        Assert.NotEqual(firstReference, booking.Reference);
+    }
 }

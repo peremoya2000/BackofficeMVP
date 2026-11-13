@@ -2,8 +2,6 @@ using System.Net;
 using System.Net.Http.Json;
 using Altairis.Backoffice.Application.Common;
 using Altairis.Backoffice.Contracts.Inventory;
-using Altairis.Backoffice.Domain.Hotels;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Altairis.Backoffice.Api.IntegrationTests.Inventory;
 
@@ -18,7 +16,7 @@ public sealed class InventoryApiTests(BackofficeApiFactory factory)
     [Fact]
     public async Task UpdateRange_CreatesNightsThenChangesOnlyTheFieldsSent()
     {
-        (Guid hotelId, Guid roomTypeId) = await CreateHotelWithRoomTypeAsync();
+        (Guid hotelId, Guid roomTypeId) = await factory.CreateHotelWithRoomTypeAsync();
         DateOnly from = Today.AddDays(10);
         DateOnly to = from.AddDays(2);
 
@@ -39,7 +37,7 @@ public sealed class InventoryApiTests(BackofficeApiFactory factory)
     [Fact]
     public async Task UpdateRange_WhenANewNightHasNoPrice_Returns400AndSavesNoNight()
     {
-        (Guid hotelId, Guid roomTypeId) = await CreateHotelWithRoomTypeAsync();
+        (Guid hotelId, Guid roomTypeId) = await factory.CreateHotelWithRoomTypeAsync();
         DateOnly from = Today.AddDays(10);
         await UpdateRangeAsync(roomTypeId, new UpdateInventoryRangeRequest(from, from, TotalRooms: 5, Price: 100m));
 
@@ -55,7 +53,7 @@ public sealed class InventoryApiTests(BackofficeApiFactory factory)
     [Fact]
     public async Task UpdateRange_ForPastNights_Returns400()
     {
-        (_, Guid roomTypeId) = await CreateHotelWithRoomTypeAsync();
+        (_, Guid roomTypeId) = await factory.CreateHotelWithRoomTypeAsync();
 
         HttpResponseMessage response = await PutAsync(
             roomTypeId,
@@ -93,24 +91,11 @@ public sealed class InventoryApiTests(BackofficeApiFactory factory)
     [InlineData("from=2026-01-01")]
     public async Task GetCalendar_WithInvalidRange_Returns400(string query)
     {
-        (Guid hotelId, _) = await CreateHotelWithRoomTypeAsync();
+        (Guid hotelId, _) = await factory.CreateHotelWithRoomTypeAsync();
 
         HttpResponseMessage response = await _client.GetAsync($"/api/hotels/{hotelId}/inventory?{query}", Cancellation);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
-
-    private async Task<(Guid HotelId, Guid RoomTypeId)> CreateHotelWithRoomTypeAsync()
-    {
-        Hotel hotel = Hotel.Create("Hotel inventario", 3, "Calle de prueba 1", "Palma", "ES", null, null, DateTime.UtcNow).Value;
-        RoomType roomType = hotel.AddRoomType("Doble estándar", RoomCategory.Double, 2).Value;
-
-        using IServiceScope scope = factory.Services.CreateScope();
-        IBackofficeDbContext dbContext = scope.ServiceProvider.GetRequiredService<IBackofficeDbContext>();
-        dbContext.Hotels.Add(hotel);
-        await dbContext.SaveChangesAsync(Cancellation);
-
-        return (hotel.Id, roomType.Id);
     }
 
     private Task<HttpResponseMessage> PutAsync(Guid roomTypeId, UpdateInventoryRangeRequest request) =>

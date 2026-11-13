@@ -16,6 +16,8 @@ public sealed class BackofficeApiFactory : WebApplicationFactory<Program>, IAsyn
     public async ValueTask InitializeAsync()
     {
         await _database.StartAsync();
+        // Test classes create their clients in parallel, and each would otherwise start and seed its own API host.
+        StartServer();
     }
 
     public override async ValueTask DisposeAsync()

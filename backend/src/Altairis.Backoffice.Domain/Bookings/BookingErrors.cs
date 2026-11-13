@@ -4,6 +4,10 @@ namespace Altairis.Backoffice.Domain.Bookings;
 
 public static class BookingErrors
 {
+    public static Error NotFound(Guid bookingId) => Error.NotFound(
+        "booking.not_found",
+        $"No existe ninguna reserva con el id {bookingId}.");
+
     public static readonly Error RoomsInvalid = Error.Validation(
         "booking.rooms_invalid",
         "La reserva debe incluir al menos una habitación.");

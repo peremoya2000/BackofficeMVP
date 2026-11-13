@@ -202,6 +202,8 @@ public sealed class Booking
         return Result.Success();
     }
 
+    public void RenewReference() => Reference = GenerateReference();
+
     private static Dictionary<DateOnly, InventoryDay> InventoryByNight(Guid roomTypeId, IReadOnlyCollection<InventoryDay> inventory)
     {
         Debug.Assert(inventory.All(day => day.RoomTypeId == roomTypeId), "Inventory rows must belong to the booked room type.");
