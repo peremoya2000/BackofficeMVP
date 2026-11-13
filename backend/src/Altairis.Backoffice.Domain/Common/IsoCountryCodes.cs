@@ -5,6 +5,8 @@ namespace Altairis.Backoffice.Domain.Common;
 // Hard-coded because RegionInfo depends on the OS's ICU data, which differs inside the Linux container.
 public static class IsoCountryCodes
 {
+    public const int CODE_LENGTH = 2;
+
     private static readonly FrozenSet<string> AssignedCodes = new[]
     {
         "AD", "AE", "AF", "AG", "AI", "AL", "AM", "AO", "AQ", "AR", "AS", "AT", "AU", "AW", "AX", "AZ",
