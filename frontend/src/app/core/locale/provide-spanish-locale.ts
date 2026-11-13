@@ -12,11 +12,13 @@ import { MatPaginatorIntl } from '@angular/material/paginator';
 import { es } from 'date-fns/locale';
 import { SpanishPaginatorIntl } from './spanish-paginator-intl';
 
+export const APP_LOCALE = 'es-ES';
+
 export function provideSpanishLocale(): EnvironmentProviders {
   registerLocaleData(localeEs);
 
   return makeEnvironmentProviders([
-    { provide: LOCALE_ID, useValue: 'es-ES' },
+    { provide: LOCALE_ID, useValue: APP_LOCALE },
     { provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR' },
     { provide: MAT_DATE_LOCALE, useValue: es },
     provideDateFnsAdapter(),

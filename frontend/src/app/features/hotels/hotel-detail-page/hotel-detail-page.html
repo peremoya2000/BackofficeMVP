@@ -1,0 +1,51 @@
+@if (hotel.hasValue()) {
+  @let details = hotel.value();
+  <app-page-header [title]="details.name" backLink="/hotels" />
+
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <dl class="details">
+        <dt>Categoría</dt>
+        <dd><app-stars [count]="details.stars" /></dd>
+
+        <dt>Dirección</dt>
+        <dd>{{ details.address }}</dd>
+
+        <dt>Ciudad</dt>
+        <dd>{{ details.city }}</dd>
+
+        <dt>País</dt>
+        <dd>{{ details.countryCode | countryName }} ({{ details.countryCode }})</dd>
+
+        <dt>Moneda</dt>
+        <dd>{{ details.currency }}</dd>
+
+        <dt>Email de contacto</dt>
+        <dd>
+          @if (details.contactEmail; as email) {
+            <a [href]="'mailto:' + email">{{ email }}</a>
+          } @else {
+            —
+          }
+        </dd>
+
+        <dt>Teléfono de contacto</dt>
+        <dd>
+          @if (details.contactPhone; as phone) {
+            <a [href]="'tel:' + phone">{{ phone }}</a>
+          } @else {
+            —
+          }
+        </dd>
+
+        <dt>Fecha de alta</dt>
+        <dd>{{ details.createdAtUtc | date: 'dd/MM/yyyy HH:mm' }}</dd>
+      </dl>
+    </mat-card-content>
+  </mat-card>
+} @else if (hotel.isLoading()) {
+  <mat-progress-bar mode="indeterminate" />
+} @else {
+  <app-page-header title="Hotel no disponible" backLink="/hotels" />
+  <p>No se ha podido cargar este hotel.</p>
+}
