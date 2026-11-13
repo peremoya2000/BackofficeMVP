@@ -1,4 +1,4 @@
-import { Component, computed, inject, linkedSignal } from '@angular/core';
+import { Component, computed, effect, inject, linkedSignal } from '@angular/core';
 import { rxResource, takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,6 +15,7 @@ import { debounceTime, map } from 'rxjs';
 import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '../../../core/http/paged-request';
 import { PagedResponse } from '../../../core/http/paged-response';
 import { CountryNamePipe } from '../../../shared/countries/country-name-pipe';
+import { LoadError } from '../../../shared/load-error/load-error';
 import { PageHeader } from '../../../shared/page-header/page-header';
 import { Stars } from '../../../shared/stars/stars';
 import { HotelListItemResponse } from '../data/hotel-list-item-response';
@@ -41,6 +42,7 @@ type HotelsPage = PagedResponse<HotelListItemResponse>;
     MatSortModule,
     MatTableModule,
     CountryNamePipe,
+    LoadError,
     PageHeader,
     Stars,
   ],
@@ -87,6 +89,8 @@ export class HotelListPage {
   });
 
   constructor() {
+    effect(() => this.showRequestInFilters(this.request()));
+
     this.filters.valueChanges
       .pipe(debounceTime(SEARCH_DEBOUNCE_MS), takeUntilDestroyed())
       .subscribe(() => {
@@ -107,6 +111,20 @@ export class HotelListPage {
 
   protected onPageChange(event: PageEvent): void {
     this.navigate({ page: event.pageIndex + 1, pageSize: event.pageSize });
+  }
+
+  // Only fields that disagree with the URL are rewritten, so the one being typed in keeps its trailing space.
+  private showRequestInFilters(request: HotelSearchRequest): void {
+    const { search, countryCode, stars } = this.filters.controls;
+    if (search.value.trim() !== (request.search ?? '')) {
+      search.setValue(request.search ?? '', { emitEvent: false });
+    }
+    if (countryCode.value.trim() !== (request.countryCode ?? '')) {
+      countryCode.setValue(request.countryCode ?? '', { emitEvent: false });
+    }
+    if (stars.value !== (request.stars ?? null)) {
+      stars.setValue(request.stars ?? null, { emitEvent: false });
+    }
   }
 
   private navigate(changes: Partial<HotelSearchRequest>): void {

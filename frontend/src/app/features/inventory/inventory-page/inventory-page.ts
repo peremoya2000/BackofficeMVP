@@ -19,7 +19,13 @@ import {
 } from 'date-fns';
 import { map } from 'rxjs';
 import { toIsoDate } from '../../../shared/dates/iso-date';
+import { LoadError } from '../../../shared/load-error/load-error';
 import { PageHeader } from '../../../shared/page-header/page-header';
+import {
+  BookingCreateDialog,
+  BookingCreateDialogData,
+} from '../../bookings/booking-create-dialog/booking-create-dialog';
+import { BookingResponse } from '../../bookings/data/booking-response';
 import { InventoryApi } from '../data/inventory-api';
 import { InventoryCalendarResponse } from '../data/inventory-calendar-response';
 import { InventoryDayResponse } from '../data/inventory-day-response';
@@ -31,7 +37,7 @@ import {
 const VISIBLE_DAYS = 14;
 const STEP_DAYS = 7;
 const HIGH_OCCUPANCY = 0.7;
-const SAVED_SNACK_BAR_DURATION_MS = 3000;
+const SNACK_BAR_DURATION_MS = 3000;
 
 type CellStatus = 'none' | 'closed' | 'sold-out' | 'high' | 'open';
 
@@ -59,6 +65,7 @@ interface Cell {
     MatIconModule,
     MatProgressBarModule,
     MatTooltipModule,
+    LoadError,
     PageHeader,
   ],
   selector: 'app-inventory-page',
@@ -140,10 +147,7 @@ export class InventoryPage {
     if (!calendar) return;
 
     const data: InventoryRangeDialogData = {
-      roomTypes: calendar.roomTypes.map((roomType) => ({
-        id: roomType.roomTypeId,
-        name: roomType.name,
-      })),
+      roomTypes: roomTypeOptions(calendar),
       roomTypeId: roomTypeId ?? calendar.roomTypes[0].roomTypeId,
       from: date ?? null,
       to: date ?? null,
@@ -156,9 +160,32 @@ export class InventoryPage {
       .subscribe((saved) => {
         if (!saved) return;
         this.snackBar.open('Inventario actualizado.', 'Cerrar', {
-          duration: SAVED_SNACK_BAR_DURATION_MS,
+          duration: SNACK_BAR_DURATION_MS,
         });
         this.calendar.reload();
+      });
+  }
+
+  protected openBookingDialog(): void {
+    const calendar = this.shownCalendar();
+    if (!calendar) return;
+
+    const data: BookingCreateDialogData = {
+      hotelName: calendar.hotelName,
+      roomTypes: roomTypeOptions(calendar),
+    };
+
+    this.dialog
+      .open<BookingCreateDialog, BookingCreateDialogData, BookingResponse>(BookingCreateDialog, {
+        data,
+      })
+      .afterClosed()
+      .subscribe((booking) => {
+        if (!booking) return;
+        this.snackBar.open(`Reserva ${booking.reference} confirmada.`, 'Cerrar', {
+          duration: SNACK_BAR_DURATION_MS,
+        });
+        this.router.navigate(['/bookings', booking.id]);
       });
   }
 
@@ -174,6 +201,10 @@ export class InventoryPage {
 function readFrom(params: ParamMap): Date {
   const from = parseISO(params.get('from') ?? '');
   return isValid(from) ? from : startOfToday();
+}
+
+function roomTypeOptions(calendar: InventoryCalendarResponse): { id: string; name: string }[] {
+  return calendar.roomTypes.map((roomType) => ({ id: roomType.roomTypeId, name: roomType.name }));
 }
 
 function toCell(column: Column, day: InventoryDayResponse | undefined): Cell {

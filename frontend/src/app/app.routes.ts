@@ -8,5 +8,6 @@ export const routes: Routes = [
     loadChildren: () => import('./features/inventory/inventory.routes'),
   },
   { path: 'hotels', loadChildren: () => import('./features/hotels/hotels.routes') },
+  { path: 'bookings', loadChildren: () => import('./features/bookings/bookings.routes') },
   { path: '**', redirectTo: 'dashboard' },
 ];

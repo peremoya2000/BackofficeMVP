@@ -1,6 +1,7 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { SHOW_ERROR_SNACK_BAR } from '../../../core/http/http-error.interceptor';
 import { PagedResponse } from '../../../core/http/paged-response';
 import { CreateHotelRequest } from './create-hotel-request';
 import { HotelListItemResponse } from './hotel-list-item-response';
@@ -20,7 +21,9 @@ export class HotelsApi {
     if (request.countryCode) params = params.set('countryCode', request.countryCode);
     if (request.stars) params = params.set('stars', request.stars);
 
-    return this.http.get<PagedResponse<HotelListItemResponse>>(HOTELS_URL, { params });
+    // The list shows a failed load in place of the table, so no snack bar for it.
+    const context = new HttpContext().set(SHOW_ERROR_SNACK_BAR, false);
+    return this.http.get<PagedResponse<HotelListItemResponse>>(HOTELS_URL, { params, context });
   }
 
   getById(id: string): Observable<HotelResponse> {

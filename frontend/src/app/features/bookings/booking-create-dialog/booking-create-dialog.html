@@ -1,0 +1,103 @@
+<h2 mat-dialog-title>Nueva reserva · {{ data.hotelName }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="confirm()">
+  <mat-dialog-content class="content">
+    <div class="fields" formGroupName="stay">
+      <mat-form-field class="fields__wide">
+        <mat-label>Tipo de habitación</mat-label>
+        <mat-select formControlName="roomTypeId">
+          @for (roomType of data.roomTypes; track roomType.id) {
+            <mat-option [value]="roomType.id">{{ roomType.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Entrada – salida</mat-label>
+        <mat-date-range-input [rangePicker]="picker" [min]="today">
+          <input matStartDate formControlName="checkIn" placeholder="Entrada" />
+          <input matEndDate formControlName="checkOut" placeholder="Salida" />
+        </mat-date-range-input>
+        <mat-datepicker-toggle matIconSuffix [for]="picker" />
+        <mat-date-range-picker #picker />
+        <mat-hint>dd/mm/aaaa – dd/mm/aaaa</mat-hint>
+        <mat-error>Indica la entrada y la salida, desde hoy.</mat-error>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Habitaciones</mat-label>
+        <input matInput type="number" min="1" formControlName="rooms" />
+        <mat-error>Al menos una habitación.</mat-error>
+      </mat-form-field>
+    </div>
+
+    <p class="quote" [class.quote--error]="quoteError()">
+      @if (quote.isLoading()) {
+        Calculando el precio…
+      } @else if (quote.hasValue()) {
+        <strong>{{ quote.value().totalPrice | currency: quote.value().currency }}</strong>
+        en total · {{ quotedStay() }}
+      } @else if (quoteError(); as message) {
+        {{ message }}
+      } @else {
+        Elige las fechas para ver el precio y la disponibilidad.
+      }
+    </p>
+
+    <div class="fields">
+      <mat-form-field>
+        <mat-label>Adultos</mat-label>
+        <input matInput type="number" min="1" formControlName="adults" />
+        <mat-error>Al menos un adulto.</mat-error>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Niños</mat-label>
+        <input matInput type="number" min="0" formControlName="children" />
+        <mat-error>No puede ser negativo.</mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="fields__wide">
+        <mat-label>Huésped principal</mat-label>
+        <input matInput formControlName="leadGuestName" placeholder="Nombre y apellidos" />
+        <mat-error>El huésped principal es obligatorio.</mat-error>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Canal de venta</mat-label>
+        <mat-select formControlName="channel">
+          @for (channel of channels; track channel[0]) {
+            <mat-option [value]="channel[0]">{{ channel[1] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Cliente</mat-label>
+        <input matInput formControlName="clientName" placeholder="Agencia, turoperador o empresa" />
+        <mat-error>El cliente es obligatorio.</mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="fields__wide">
+        <mat-label>Referencia del cliente (opcional)</mat-label>
+        <input matInput formControlName="clientReference" />
+      </mat-form-field>
+
+      <mat-form-field class="fields__wide">
+        <mat-label>Observaciones (opcional)</mat-label>
+        <textarea matInput rows="2" formControlName="notes"></textarea>
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button matButton type="button" mat-dialog-close [disabled]="saving()">Cancelar</button>
+    <button
+      matButton="filled"
+      type="submit"
+      [disabled]="form.invalid || !quote.hasValue() || quote.isLoading() || saving()"
+    >
+      Confirmar reserva
+    </button>
+  </mat-dialog-actions>
+</form>

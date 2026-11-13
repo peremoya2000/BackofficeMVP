@@ -1,0 +1,85 @@
+@if (booking.hasValue()) {
+  @let details = booking.value();
+  <app-page-header [title]="'Reserva ' + details.reference">
+    <a
+      matButton="outlined"
+      [routerLink]="['/hotels', details.hotelId, 'inventory']"
+      [queryParams]="{ from: details.checkIn }"
+    >
+      <mat-icon>calendar_month</mat-icon>
+      Ver en el inventario
+    </a>
+    @if (canCancel()) {
+      <button matButton="filled" type="button" [disabled]="cancelling()" (click)="cancel()">
+        <mat-icon>event_busy</mat-icon>
+        Cancelar reserva
+      </button>
+    }
+  </app-page-header>
+
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <dl class="details">
+        <dt>Estado</dt>
+        <dd>
+          <span class="status" [class]="'status--' + details.status">
+            {{ statusLabels[details.status] }}
+          </span>
+          @if (details.cancelledAtUtc; as cancelledAt) {
+            el {{ cancelledAt | date: 'dd/MM/yyyy HH:mm' }}
+          }
+        </dd>
+
+        <dt>Hotel</dt>
+        <dd>
+          <a [routerLink]="['/hotels', details.hotelId]">{{ details.hotelName }}</a>
+        </dd>
+
+        <dt>Tipo de habitación</dt>
+        <dd>{{ details.roomTypeName }}</dd>
+
+        <dt>Estancia</dt>
+        <dd>
+          {{ details.checkIn | date: 'dd/MM/yyyy' }} –
+          {{ details.checkOut | date: 'dd/MM/yyyy' }} ({{ nights() | i18nPlural: nightsPlural }})
+        </dd>
+
+        <dt>Habitaciones</dt>
+        <dd>{{ details.rooms }}</dd>
+
+        <dt>Huéspedes</dt>
+        <dd>
+          {{ details.adults | i18nPlural: adultsPlural }}
+          @if (details.children > 0) {
+            y {{ details.children | i18nPlural: childrenPlural }}
+          }
+        </dd>
+
+        <dt>Huésped principal</dt>
+        <dd>{{ details.leadGuestName }}</dd>
+
+        <dt>Cliente</dt>
+        <dd>
+          {{ details.clientName }} · {{ channelLabels[details.channel] }}
+          @if (details.clientReference; as clientReference) {
+            · ref. {{ clientReference }}
+          }
+        </dd>
+
+        <dt>Precio total</dt>
+        <dd>{{ details.totalPrice | currency: details.currency }}</dd>
+
+        <dt>Observaciones</dt>
+        <dd>{{ details.notes ?? '—' }}</dd>
+
+        <dt>Fecha de reserva</dt>
+        <dd>{{ details.createdAtUtc | date: 'dd/MM/yyyy HH:mm' }}</dd>
+      </dl>
+    </mat-card-content>
+  </mat-card>
+} @else if (booking.isLoading()) {
+  <mat-progress-bar mode="indeterminate" />
+} @else {
+  <app-page-header title="Reserva no disponible" />
+  <p>No se ha podido cargar esta reserva.</p>
+}

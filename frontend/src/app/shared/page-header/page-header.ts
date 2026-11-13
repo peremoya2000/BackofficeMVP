@@ -1,16 +1,17 @@
-import { Component, input } from '@angular/core';
+import { Location } from '@angular/common';
+import { Component, inject, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 
 @Component({
-  imports: [RouterLink, MatButtonModule, MatIconModule],
+  imports: [MatButtonModule, MatIconModule],
   selector: 'app-page-header',
   template: `
     @if (backLink(); as link) {
-      <a matIconButton [routerLink]="link" aria-label="Volver">
+      <button matIconButton type="button" aria-label="Volver" (click)="goBack(link)">
         <mat-icon>arrow_back</mat-icon>
-      </a>
+      </button>
     }
     <h1>{{ title() }}</h1>
     <ng-content />
@@ -31,6 +32,18 @@ import { RouterLink } from '@angular/router';
   `,
 })
 export class PageHeader {
+  private readonly router = inject(Router);
+  private readonly location = inject(Location);
+
   readonly title = input.required<string>();
   readonly backLink = input<string>();
+
+  // History keeps the previous page's URL state (search, page, week); a page opened directly has none.
+  protected goBack(fallbackLink: string): void {
+    if (this.router.lastSuccessfulNavigation()?.previousNavigation) {
+      this.location.back();
+    } else {
+      this.router.navigateByUrl(fallbackLink);
+    }
+  }
 }

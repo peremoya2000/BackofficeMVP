@@ -1,4 +1,9 @@
-import { HttpErrorResponse, HttpInterceptorFn, HttpStatusCode } from '@angular/common/http';
+import {
+  HttpContextToken,
+  HttpErrorResponse,
+  HttpInterceptorFn,
+  HttpStatusCode,
+} from '@angular/common/http';
 import { inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { catchError, throwError } from 'rxjs';
@@ -6,12 +11,15 @@ import { ProblemDetails } from './problem-details';
 
 const SNACK_BAR_DURATION_MS = 6000;
 
+// Set to false on requests whose errors the page shows by itself.
+export const SHOW_ERROR_SNACK_BAR = new HttpContextToken<boolean>(() => true);
+
 export const httpErrorInterceptor: HttpInterceptorFn = (request, next) => {
   const snackBar = inject(MatSnackBar);
 
   return next(request).pipe(
     catchError((error: unknown) => {
-      if (error instanceof HttpErrorResponse) {
+      if (error instanceof HttpErrorResponse && request.context.get(SHOW_ERROR_SNACK_BAR)) {
         snackBar.open(toUserMessage(error), 'Cerrar', { duration: SNACK_BAR_DURATION_MS });
       }
       return throwError(() => error);
@@ -19,7 +27,7 @@ export const httpErrorInterceptor: HttpInterceptorFn = (request, next) => {
   );
 };
 
-function toUserMessage(error: HttpErrorResponse): string {
+export function toUserMessage(error: HttpErrorResponse): string {
   const problem = error.error as ProblemDetails | null;
   // Only domain errors (they carry a code) have a Spanish detail; framework errors are in English.
   if (problem?.code && problem.detail) return problem.detail;
