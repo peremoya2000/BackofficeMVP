@@ -1,2 +1,80 @@
-<h1>Panel de operaciones</h1>
-<p>Aquí verás la actividad del día: llegadas, salidas, ocupación y evolución de las reservas.</p>
+<app-page-header title="Panel de operaciones">
+  <span class="today">{{ today | date: 'fullDate' }}</span>
+</app-page-header>
+
+<div class="loading">
+  @if (summary.isLoading() || occupancy.isLoading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+</div>
+
+<section class="kpis" aria-label="Actividad de hoy">
+  @if (summary.error(); as error) {
+    <app-load-error class="kpis__error" [error]="error" (retry)="summary.reload()" />
+  } @else if (summary.hasValue()) {
+    @let day = summary.value();
+
+    <a class="kpi" routerLink="/bookings" [queryParams]="{ status: 'Confirmed', checkIn: today }">
+      <mat-icon>login</mat-icon>
+      <span class="kpi__label">Llegadas hoy</span>
+      <span class="kpi__value">{{ day.arrivals | number }}</span>
+      <span class="kpi__hint">Ver las reservas</span>
+    </a>
+
+    <a class="kpi" routerLink="/bookings" [queryParams]="{ status: 'Confirmed', checkOut: today }">
+      <mat-icon>logout</mat-icon>
+      <span class="kpi__label">Salidas hoy</span>
+      <span class="kpi__value">{{ day.departures | number }}</span>
+      <span class="kpi__hint">Ver las reservas</span>
+    </a>
+
+    <div class="kpi">
+      <mat-icon>hotel</mat-icon>
+      <span class="kpi__label">Reservas confirmadas esta noche</span>
+      <span class="kpi__value">{{ day.staysInProgress | number }}</span>
+    </div>
+
+    <div class="kpi">
+      <mat-icon>bed</mat-icon>
+      <span class="kpi__label">Ocupación esta noche</span>
+      <span class="kpi__value">
+        @if (day.totalRooms > 0) {
+          {{ day.bookedRooms / day.totalRooms | percent }}
+        } @else {
+          —
+        }
+      </span>
+      <span class="kpi__hint">
+        {{ day.bookedRooms | number }} de {{ day.totalRooms | number }} habitaciones
+      </span>
+    </div>
+
+    <a class="kpi" routerLink="/bookings">
+      <mat-icon>add_circle</mat-icon>
+      <span class="kpi__label">Reservas nuevas</span>
+      <span class="kpi__value">{{ day.newBookings | number }}</span>
+      <span class="kpi__hint">Creadas hoy · ver las últimas</span>
+    </a>
+
+    <div class="kpi">
+      <mat-icon>event_busy</mat-icon>
+      <span class="kpi__label">Cancelaciones</span>
+      <span class="kpi__value">{{ day.cancellations | number }}</span>
+      <span class="kpi__hint">Canceladas hoy</span>
+    </div>
+  }
+</section>
+
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <mat-card-title>Ocupación de los próximos {{ occupancyNights }} días</mat-card-title>
+    <mat-card-subtitle>Habitaciones reservadas sobre el cupo total, por noche</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content class="chart">
+    @if (occupancy.error(); as error) {
+      <app-load-error [error]="error" (retry)="occupancy.reload()" />
+    } @else if (occupancy.hasValue()) {
+      <app-occupancy-chart [nights]="occupancy.value()" />
+    }
+  </mat-card-content>
+</mat-card>
