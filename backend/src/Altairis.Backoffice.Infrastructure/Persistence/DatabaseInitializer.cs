@@ -1,6 +1,8 @@
 using Altairis.Backoffice.Domain.Hotels;
 using Altairis.Backoffice.Infrastructure.Persistence.Seeding;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Altairis.Backoffice.Infrastructure.Persistence;
@@ -9,6 +11,8 @@ internal sealed class DatabaseInitializer(BackofficeDbContext dbContext, HotelSe
 {
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
+        // MigrateAsync reads the history table before creating it, which logs an error on a fresh database.
+        await dbContext.GetService<IHistoryRepository>().CreateIfNotExistsAsync(cancellationToken);
         await dbContext.Database.MigrateAsync(cancellationToken);
 
         if (await dbContext.Hotels.AnyAsync(cancellationToken)) return;
