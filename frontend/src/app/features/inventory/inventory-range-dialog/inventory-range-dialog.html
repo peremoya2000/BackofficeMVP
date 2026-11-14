@@ -48,7 +48,7 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button matButton type="button" mat-dialog-close>Cancelar</button>
+    <button matButton type="button" mat-dialog-close [disabled]="saving()">Cancelar</button>
     <button matButton="filled" type="submit" [disabled]="form.invalid || saving()">Aplicar</button>
   </mat-dialog-actions>
 </form>

@@ -67,6 +67,7 @@ export class InventoryRangeDialog {
     if (this.form.invalid || !value.from || !value.to) return;
 
     this.saving.set(true);
+    this.dialogRef.disableClose = true;
     this.inventoryApi
       .updateRange(value.roomTypeId, {
         from: toIsoDate(value.from),
@@ -77,7 +78,10 @@ export class InventoryRangeDialog {
       })
       .subscribe({
         next: () => this.dialogRef.close(true),
-        error: () => this.saving.set(false),
+        error: () => {
+          this.saving.set(false);
+          this.dialogRef.disableClose = false;
+        },
       });
   }
 }
