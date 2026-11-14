@@ -105,6 +105,24 @@ public sealed class BookingsApiTests(BackofficeApiFactory factory)
     }
 
     [Fact]
+    public async Task Create_WhenManyRequestsRaceForTheLastRoom_ConfirmsOnlyOne()
+    {
+        const int REQUESTS = 10;
+        (Guid hotelId, Guid roomTypeId) = await factory.CreateHotelWithRoomTypeAsync();
+        DateOnly checkIn = Today.AddDays(10);
+        await PutInventoryAsync(roomTypeId, new UpdateInventoryRangeRequest(checkIn, checkIn, TotalRooms: 1, Price: 100m));
+        CreateBookingRequest request = NewBookingRequest(roomTypeId, checkIn, checkIn.AddDays(1), quotedTotal: 100m);
+
+        HttpResponseMessage[] responses = await Task.WhenAll(
+            Enumerable.Range(0, REQUESTS).Select(_ => _client.PostAsJsonAsync(BOOKINGS_URL, request, Cancellation)));
+
+        Assert.Single(responses, response => response.StatusCode == HttpStatusCode.Created);
+        Assert.Equal(REQUESTS - 1, responses.Count(response => response.StatusCode == HttpStatusCode.Conflict));
+        int[] bookedRooms = await BookedRoomsAsync(hotelId, checkIn, checkIn);
+        Assert.Equal(new[] { 1 }, bookedRooms);
+    }
+
+    [Fact]
     public async Task Cancel_WhenAlreadyCancelled_Returns409()
     {
         (_, Guid roomTypeId) = await factory.CreateHotelWithRoomTypeAsync();
