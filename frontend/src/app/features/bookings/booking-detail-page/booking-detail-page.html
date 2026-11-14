@@ -1,6 +1,6 @@
 @if (booking.hasValue()) {
   @let details = booking.value();
-  <app-page-header [title]="'Reserva ' + details.reference">
+  <app-page-header [title]="'Reserva ' + details.reference" backLink="/bookings">
     <a
       matButton="outlined"
       [routerLink]="['/hotels', details.hotelId, 'inventory']"
@@ -10,7 +10,12 @@
       Ver en el inventario
     </a>
     @if (canCancel()) {
-      <button matButton="filled" type="button" [disabled]="cancelling()" (click)="cancel()">
+      <button
+        matButton="filled"
+        type="button"
+        [disabled]="cancelling() || booking.isLoading()"
+        (click)="cancel()"
+      >
         <mat-icon>event_busy</mat-icon>
         Cancelar reserva
       </button>
@@ -22,9 +27,7 @@
       <dl class="details">
         <dt>Estado</dt>
         <dd>
-          <span class="status" [class]="'status--' + details.status">
-            {{ statusLabels[details.status] }}
-          </span>
+          <app-booking-status-chip [status]="details.status" />
           @if (details.cancelledAtUtc; as cancelledAt) {
             el {{ cancelledAt | date: 'dd/MM/yyyy HH:mm' }}
           }
@@ -80,6 +83,6 @@
 } @else if (booking.isLoading()) {
   <mat-progress-bar mode="indeterminate" />
 } @else {
-  <app-page-header title="Reserva no disponible" />
+  <app-page-header title="Reserva no disponible" backLink="/bookings" />
   <p>No se ha podido cargar esta reserva.</p>
 }

@@ -16,20 +16,3 @@ dd {
 dd a {
   color: var(--mat-sys-primary);
 }
-
-.status {
-  margin-right: 4px;
-  padding: 2px 10px;
-  border-radius: var(--mat-sys-corner-full);
-  font: var(--mat-sys-label-large);
-}
-
-.status--Confirmed {
-  background-color: #d4eed9;
-  color: #1d5b2a;
-}
-
-.status--Cancelled {
-  background-color: var(--mat-sys-surface-container-highest);
-  color: var(--mat-sys-on-surface-variant);
-}

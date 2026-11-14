@@ -1,4 +1,5 @@
 import { CurrencyPipe, DatePipe, I18nPluralPipe } from '@angular/common';
+import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,8 +13,8 @@ import { differenceInCalendarDays, isBefore, parseISO, startOfToday } from 'date
 import { filter, switchMap, tap } from 'rxjs';
 import { ConfirmDialog, ConfirmDialogData } from '../../../shared/confirm-dialog/confirm-dialog';
 import { PageHeader } from '../../../shared/page-header/page-header';
+import { BookingStatusChip } from '../booking-status-chip/booking-status-chip';
 import { BOOKING_CHANNEL_LABELS } from '../data/booking-channel';
-import { BOOKING_STATUS_LABELS } from '../data/booking-status';
 import { BookingsApi } from '../data/bookings-api';
 
 const CANCELLED_SNACK_BAR_DURATION_MS = 4000;
@@ -29,6 +30,7 @@ const CANCELLED_SNACK_BAR_DURATION_MS = 4000;
     MatIconModule,
     MatProgressBarModule,
     PageHeader,
+    BookingStatusChip,
   ],
   selector: 'app-booking-detail-page',
   styleUrl: './booking-detail-page.scss',
@@ -42,7 +44,6 @@ export class BookingDetailPage {
   readonly id = input.required<string>();
 
   protected readonly channelLabels = BOOKING_CHANNEL_LABELS;
-  protected readonly statusLabels = BOOKING_STATUS_LABELS;
   protected readonly nightsPlural = { '=1': '# noche', other: '# noches' };
   protected readonly adultsPlural = { '=1': '# adulto', other: '# adultos' };
   protected readonly childrenPlural = { '=1': '# niño', other: '# niños' };
@@ -92,7 +93,10 @@ export class BookingDetailPage {
           });
           this.booking.reload();
         },
-        error: () => this.cancelling.set(false),
+        error: (error: HttpErrorResponse) => {
+          this.cancelling.set(false);
+          if (error.status === HttpStatusCode.Conflict) this.booking.reload();
+        },
       });
   }
 }
