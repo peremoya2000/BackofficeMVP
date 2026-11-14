@@ -8,4 +8,7 @@ public static class OperationsCalendar
         DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, OperationsTimeZone));
 
     public static DateOnly Today(TimeProvider timeProvider) => DateOf(timeProvider.GetUtcNow().UtcDateTime);
+
+    public static DateTime StartOfDayUtc(DateOnly date) =>
+        TimeZoneInfo.ConvertTimeToUtc(date.ToDateTime(TimeOnly.MinValue), OperationsTimeZone);
 }
