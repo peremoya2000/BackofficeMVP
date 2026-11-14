@@ -13,7 +13,7 @@ internal static class SamplePortfolioGenerator
     private const int PAST_DAYS = 60;
     private const int FUTURE_DAYS = 120;
     private const int MAX_LEAD_DAYS = 120;
-    private const int BOOKING_ATTEMPTS_PER_ROOM = 70;
+    private const int BOOKING_ATTEMPTS_PER_ROOM = 50;
     private const int MAX_SALES_CLOSED_START_DAYS = 60;
     private const int MIN_SALES_CLOSED_NIGHTS = 2;
     private const int MAX_SALES_CLOSED_NIGHTS = 5;
