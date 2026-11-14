@@ -4,7 +4,6 @@ using Altairis.Backoffice.Domain.Common;
 using Altairis.Backoffice.Domain.Hotels;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace Altairis.Backoffice.Application.RoomTypes;
 
 internal sealed class RoomTypeService(IBackofficeDbContext dbContext) : IRoomTypeService
@@ -15,9 +14,14 @@ internal sealed class RoomTypeService(IBackofficeDbContext dbContext) : IRoomTyp
         if (!hotelExists) return HotelErrors.NotFound(hotelId);
 
         List<RoomTypeResponse> roomTypes = await dbContext.RoomTypes.AsNoTracking()
-            .Where(rt => rt.HotelId == hotelId)
-            .OrderBy(rt => rt.Name)
-            .Select(rt => new RoomTypeResponse(rt.Id, rt.HotelId, rt.Name, rt.Category.ToString(), rt.MaxOccupancy))
+            .Where(roomType => roomType.HotelId == hotelId)
+            .OrderBy(roomType => roomType.Name)
+            .Select(roomType => new RoomTypeResponse(
+                roomType.Id,
+                roomType.HotelId,
+                roomType.Name,
+                roomType.Category.ToString(),
+                roomType.MaxOccupancy))
             .ToListAsync(cancellationToken);
 
         return roomTypes;
@@ -31,15 +35,14 @@ internal sealed class RoomTypeService(IBackofficeDbContext dbContext) : IRoomTyp
         return roomType.ToResponse();
     }
 
-
     public async Task<Result<RoomTypeResponse>> CreateAsync(Guid hotelId, CreateRoomTypeRequest request, CancellationToken cancellationToken)
     {
-        if (!Enum.TryParse<RoomCategory>(request.Category, true, out var category)) return RoomTypeErrors.CategoryInvalid;
+        if (!Enum.TryParse(request.Category, true, out RoomCategory category)) return RoomTypeErrors.CategoryInvalid;
 
-        //The hotel checks for duplicate names against the room types it has loaded, so load them all.
+        // The hotel checks for duplicate names against the room types it has loaded, so load them all.
         Hotel? hotel = await dbContext.Hotels
-            .Include(h => h.RoomTypes)
-            .SingleOrDefaultAsync(h => h.Id == hotelId, cancellationToken);
+            .Include(hotel => hotel.RoomTypes)
+            .SingleOrDefaultAsync(hotel => hotel.Id == hotelId, cancellationToken);
         if (hotel is null) return HotelErrors.NotFound(hotelId);
 
         Result<RoomType> added = hotel.AddRoomType(request.Name, category, request.MaxOccupancy);

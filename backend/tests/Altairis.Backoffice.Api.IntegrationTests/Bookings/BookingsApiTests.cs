@@ -209,6 +209,22 @@ public sealed class BookingsApiTests(BackofficeApiFactory factory)
     }
 
     [Theory]
+    [InlineData("createdAtUtc")]
+    [InlineData("-createdAtUtc")]
+    [InlineData("reference")]
+    [InlineData("-reference")]
+    [InlineData("checkIn")]
+    [InlineData("-checkIn")]
+    [InlineData("checkOut")]
+    [InlineData("-checkOut")]
+    public async Task Search_WithEachSortTheListOffers_Returns200(string sort)
+    {
+        HttpResponseMessage response = await _client.GetAsync($"{BOOKINGS_URL}?sort={sort}", Cancellation);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Theory]
     [InlineData("status=Pending")]
     [InlineData("sort=leadGuestName")]
     [InlineData("checkIn=not-a-date")]

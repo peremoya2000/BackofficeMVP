@@ -6,7 +6,6 @@ namespace Altairis.Backoffice.Api.IntegrationTests;
 
 internal static class ArrangeExtensions
 {
-    // There's no room types API yet, so the hotel is built through the domain and saved with the DbContext.
     public static async Task<(Guid HotelId, Guid RoomTypeId)> CreateHotelWithRoomTypeAsync(this BackofficeApiFactory factory)
     {
         Hotel hotel = Hotel.Create("Hotel de prueba", 3, "Calle de prueba 1", "Palma", "ES", null, null, DateTime.UtcNow).Value;

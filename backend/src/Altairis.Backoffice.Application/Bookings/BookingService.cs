@@ -20,7 +20,7 @@ internal sealed class BookingService(IBackofficeDbContext dbContext, TimeProvide
     {
         IQueryable<Booking> bookings = dbContext.Bookings.AsNoTracking();
 
-        if(!string.IsNullOrWhiteSpace(request.Search))
+        if (!string.IsNullOrWhiteSpace(request.Search))
         {
             string pattern = LikePattern.Containing(request.Search.Trim());
             bookings = bookings.Where(booking =>
@@ -29,18 +29,19 @@ internal sealed class BookingService(IBackofficeDbContext dbContext, TimeProvide
                 || EF.Functions.ILike(booking.ClientName, pattern, LikePattern.ESCAPE_CHARACTER));
         }
 
-        if(request.Status is not null)
+        if (request.Status is not null)
         {
-            if(!Enum.TryParse(request.Status, out BookingStatus status)) return BookingErrors.StatusInvalid;
+            if (!Enum.TryParse(request.Status, out BookingStatus status)) return BookingErrors.StatusInvalid;
             bookings = bookings.Where(booking => booking.Status == status);
         }
 
-        if(request.CheckIn is DateOnly checkIn) bookings = bookings.Where(booking => booking.Stay.CheckIn == checkIn);
-        if(request.CheckOut is DateOnly checkOut) bookings = bookings.Where(booking => booking.Stay.CheckOut == checkOut);
+        if (request.CheckIn is DateOnly checkIn) bookings = bookings.Where(booking => booking.Stay.CheckIn == checkIn);
+        if (request.CheckOut is DateOnly checkOut) bookings = bookings.Where(booking => booking.Stay.CheckOut == checkOut);
 
         IOrderedQueryable<Booking>? ordered = request.Sort switch
         {
             null or "-createdAtUtc" => bookings.OrderByDescending(booking => booking.CreatedAtUtc),
+            "createdAtUtc" => bookings.OrderBy(booking => booking.CreatedAtUtc),
             "reference" => bookings.OrderBy(booking => booking.Reference),
             "-reference" => bookings.OrderByDescending(booking => booking.Reference),
             "checkIn" => bookings.OrderBy(booking => booking.Stay.CheckIn),
@@ -49,7 +50,7 @@ internal sealed class BookingService(IBackofficeDbContext dbContext, TimeProvide
             "-checkOut" => bookings.OrderByDescending(booking => booking.Stay.CheckOut),
             _ => null,
         };
-        if(ordered is null) return RequestErrors.SortInvalid(request.Sort);
+        if (ordered is null) return RequestErrors.SortInvalid(request.Sort);
 
         return await (
             from booking in ordered.ThenBy(booking => booking.Id)

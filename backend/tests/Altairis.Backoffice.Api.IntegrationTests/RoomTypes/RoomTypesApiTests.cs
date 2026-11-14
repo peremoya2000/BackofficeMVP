@@ -40,7 +40,7 @@ public sealed class RoomTypesApiTests(BackofficeApiFactory factory)
 
         HttpResponseMessage response = await _client.PostAsJsonAsync(
             RoomTypesUrl(hotelId),
-            new CreateRoomTypeRequest("Doble estándar", "Suite", 3),
+            new CreateRoomTypeRequest("doble estándar", "Suite", 3),
             Cancellation);
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
