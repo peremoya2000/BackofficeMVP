@@ -48,6 +48,8 @@
       </dl>
     </mat-card-content>
   </mat-card>
+
+  <app-room-types-section [hotelId]="details.id" />
 } @else if (hotel.isLoading()) {
   <mat-progress-bar mode="indeterminate" />
 } @else {

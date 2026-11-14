@@ -1,0 +1,32 @@
+<h2 mat-dialog-title>Nuevo tipo de habitación</h2>
+
+<form [formGroup]="form" (ngSubmit)="save()">
+  <mat-dialog-content class="fields">
+    <mat-form-field>
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="name" placeholder="Doble Superior Vista Mar" />
+      <mat-error>El nombre es obligatorio.</mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Categoría</mat-label>
+      <mat-select formControlName="category">
+        @for (category of categories; track category[0]) {
+          <mat-option [value]="category[0]">{{ category[1] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Ocupación máxima</mat-label>
+      <input matInput type="number" min="1" formControlName="maxOccupancy" />
+      <span matTextSuffix>personas</span>
+      <mat-error>Al menos una persona.</mat-error>
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button matButton type="button" mat-dialog-close [disabled]="saving()">Cancelar</button>
+    <button matButton="filled" type="submit" [disabled]="form.invalid || saving()">Crear</button>
+  </mat-dialog-actions>
+</form>

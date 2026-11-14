@@ -1,0 +1,40 @@
+<div class="header">
+  <h2>Tipos de habitación</h2>
+  <button matButton="outlined" type="button" (click)="openCreateDialog()">
+    <mat-icon>add</mat-icon>
+    Nuevo tipo
+  </button>
+</div>
+
+@if (roomTypes.error(); as error) {
+  <app-load-error [error]="error" (retry)="roomTypes.reload()" />
+} @else if (roomTypes.hasValue()) {
+  <div class="table-container">
+    <table mat-table [dataSource]="roomTypes.value()">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Nombre</th>
+        <td mat-cell *matCellDef="let roomType">{{ roomType.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef>Categoría</th>
+        <td mat-cell *matCellDef="let roomType">{{ categoryLabel(roomType.category) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="maxOccupancy">
+        <th mat-header-cell *matHeaderCellDef>Ocupación máxima</th>
+        <td mat-cell *matCellDef="let roomType">{{ roomType.maxOccupancy }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let roomType; columns: displayedColumns"></tr>
+      <tr class="mat-mdc-row" *matNoDataRow>
+        <td class="mat-mdc-cell no-data" [attr.colspan]="displayedColumns.length">
+          Este hotel aún no tiene tipos de habitación.
+        </td>
+      </tr>
+    </table>
+  </div>
+} @else {
+  <mat-progress-bar mode="indeterminate" />
+}
