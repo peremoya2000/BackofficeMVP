@@ -1,5 +1,6 @@
 using Altairis.Backoffice.Application.Bookings;
 using Altairis.Backoffice.Contracts.Bookings;
+using Altairis.Backoffice.Contracts.Common;
 using Altairis.Backoffice.Domain.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -9,6 +10,16 @@ namespace Altairis.Backoffice.Api.Controllers;
 [Route("api")]
 public sealed class BookingsController(IBookingService bookingService) : ApiControllerBase
 {
+    [HttpGet("bookings")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<PagedResponse<BookingListItemResponse>>> Search(
+        [FromQuery] BookingSearchRequest request,
+        CancellationToken cancellationToken)
+    {
+        Result<PagedResponse<BookingListItemResponse>> result = await bookingService.SearchAsync(request, cancellationToken);
+        return OkOrProblem(result);
+    }
+
     [HttpGet("room-types/{roomTypeId:guid}/quote")]
     [EndpointDescription("The total price of the stay, or why it can't be sold (400 or 409). Saves nothing.")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

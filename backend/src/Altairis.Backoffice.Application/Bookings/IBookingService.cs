@@ -1,5 +1,6 @@
 using Altairis.Backoffice.Contracts.Bookings;
 using Altairis.Backoffice.Domain.Common;
+using Altairis.Backoffice.Contracts.Common;
 
 namespace Altairis.Backoffice.Application.Bookings;
 
@@ -11,6 +12,8 @@ public interface IBookingService
         DateOnly checkOut,
         int rooms,
         CancellationToken cancellationToken);
+
+    Task<Result<PagedResponse<BookingListItemResponse>>> SearchAsync(BookingSearchRequest request, CancellationToken cancellationToken);
 
     Task<Result<BookingResponse>> CreateAsync(CreateBookingRequest request, CancellationToken cancellationToken);
 

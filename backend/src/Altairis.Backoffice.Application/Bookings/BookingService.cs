@@ -1,6 +1,7 @@
 using Altairis.Backoffice.Application.Common;
 using Altairis.Backoffice.Application.Inventory;
 using Altairis.Backoffice.Contracts.Bookings;
+using Altairis.Backoffice.Contracts.Common;
 using Altairis.Backoffice.Domain.Bookings;
 using Altairis.Backoffice.Domain.Common;
 using Altairis.Backoffice.Domain.Hotels;
@@ -14,6 +15,58 @@ internal sealed class BookingService(IBackofficeDbContext dbContext, TimeProvide
 {
     private const int MAX_SAVE_ATTEMPTS = 3;
     private const string REFERENCE_INDEX_NAME = "ix_bookings_reference";
+
+    public async Task<Result<PagedResponse<BookingListItemResponse>>> SearchAsync(BookingSearchRequest request, CancellationToken cancellationToken)
+    {
+        IQueryable<Booking> bookings = dbContext.Bookings.AsNoTracking();
+
+        if(!string.IsNullOrWhiteSpace(request.Search))
+        {
+            string pattern = LikePattern.Containing(request.Search.Trim());
+            bookings = bookings.Where(booking =>
+                EF.Functions.ILike(booking.Reference, pattern, LikePattern.ESCAPE_CHARACTER)
+                || EF.Functions.ILike(booking.LeadGuestName, pattern, LikePattern.ESCAPE_CHARACTER)
+                || EF.Functions.ILike(booking.ClientName, pattern, LikePattern.ESCAPE_CHARACTER));
+        }
+
+        if(request.Status is not null)
+        {
+            if(!Enum.TryParse(request.Status, out BookingStatus status)) return BookingErrors.StatusInvalid;
+            bookings = bookings.Where(booking => booking.Status == status);
+        }
+
+        if(request.CheckIn is DateOnly checkIn) bookings = bookings.Where(booking => booking.Stay.CheckIn == checkIn);
+        if(request.CheckOut is DateOnly checkOut) bookings = bookings.Where(booking => booking.Stay.CheckOut == checkOut);
+
+        IOrderedQueryable<Booking>? ordered = request.Sort switch
+        {
+            null or "-createdAtUtc" => bookings.OrderByDescending(booking => booking.CreatedAtUtc),
+            "reference" => bookings.OrderBy(booking => booking.Reference),
+            "-reference" => bookings.OrderByDescending(booking => booking.Reference),
+            "checkIn" => bookings.OrderBy(booking => booking.Stay.CheckIn),
+            "-checkIn" => bookings.OrderByDescending(booking => booking.Stay.CheckIn),
+            "checkOut" => bookings.OrderBy(booking => booking.Stay.CheckOut),
+            "-checkOut" => bookings.OrderByDescending(booking => booking.Stay.CheckOut),
+            _ => null,
+        };
+        if(ordered is null) return RequestErrors.SortInvalid(request.Sort);
+
+        return await (
+            from booking in ordered.ThenBy(booking => booking.Id)
+            join hotel in dbContext.Hotels on booking.HotelId equals hotel.Id
+            select new BookingListItemResponse(
+                booking.Id,
+                booking.Reference,
+                booking.Status.ToString(),
+                hotel.Id,
+                hotel.Name,
+                booking.Stay.CheckIn,
+                booking.Stay.CheckOut,
+                booking.LeadGuestName,
+                booking.ClientName,
+                booking.CreatedAtUtc))
+            .ToPagedResponseAsync(request, cancellationToken);
+    }
 
     public async Task<Result<QuoteResponse>> QuoteAsync(
         Guid roomTypeId,

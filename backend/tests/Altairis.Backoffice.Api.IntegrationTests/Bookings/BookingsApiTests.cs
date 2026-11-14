@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Altairis.Backoffice.Application.Common;
 using Altairis.Backoffice.Contracts.Bookings;
+using Altairis.Backoffice.Contracts.Common;
 using Altairis.Backoffice.Contracts.Inventory;
 using Altairis.Backoffice.Domain.Bookings;
 using Altairis.Backoffice.Domain.Inventory;
@@ -148,12 +149,83 @@ public sealed class BookingsApiTests(BackofficeApiFactory factory)
         Assert.All(nights, night => Assert.Equal(bookedRoomsByNight.GetValueOrDefault((night.RoomTypeId, night.Date)), night.BookedRooms));
     }
 
+    [Fact]
+    public async Task Search_ArrivalsOfADay_SkipsOtherDaysAndCancelledBookings()
+    {
+        (_, Guid roomTypeId) = await factory.CreateHotelWithRoomTypeAsync();
+        DateOnly arrivalDay = Today.AddDays(10);
+        await LoadInventoryAsync(roomTypeId, arrivalDay, arrivalDay.AddDays(1), price: 100m);
+
+        string guestName = $"Ana {NewToken()}";
+        BookingResponse arriving = await CreateBookingAsync(
+            NewBookingRequest(roomTypeId, arrivalDay, arrivalDay.AddDays(1), quotedTotal: 100m, leadGuestName: guestName));
+        await CreateBookingAsync(
+            NewBookingRequest(roomTypeId, arrivalDay.AddDays(1), arrivalDay.AddDays(2), quotedTotal: 100m, leadGuestName: guestName));
+
+        BookingResponse cancelled = await CreateBookingAsync(
+            NewBookingRequest(roomTypeId, arrivalDay, arrivalDay.AddDays(1), quotedTotal: 100m, leadGuestName: guestName));
+        await _client.PostAsync($"{BOOKINGS_URL}/{cancelled.Id}/cancel", null, Cancellation);
+
+        PagedResponse<BookingListItemResponse> page = await SearchAsync(
+            $"search={guestName}&checkIn={arrivalDay:yyyy-MM-dd}&status=Confirmed");
+
+        BookingListItemResponse match = Assert.Single(page.Items);
+        Assert.Equal(arriving.Id, match.Id);
+    }
+
+    [Fact]
+    public async Task Search_ByReference_FindsThatBooking()
+    {
+        (_, Guid roomTypeId) = await factory.CreateHotelWithRoomTypeAsync();
+        DateOnly checkIn = Today.AddDays(10);
+        await LoadInventoryAsync(roomTypeId, checkIn, checkIn.AddDays(1), price: 100m);
+
+        BookingResponse booking = await CreateBookingAsync(
+            NewBookingRequest(roomTypeId, checkIn, checkIn.AddDays(1), quotedTotal: 100m));
+
+        PagedResponse<BookingListItemResponse> page = await SearchAsync($"search={booking.Reference.ToLowerInvariant()}");
+
+        BookingListItemResponse match = Assert.Single(page.Items);
+        Assert.Equal(booking.Id, match.Id);
+        Assert.Equal(booking.HotelName, match.HotelName);
+        Assert.Equal("Confirmed", match.Status);
+    }
+
+    [Fact]
+    public async Task Search_SortsByCheckInDescending()
+    {
+        (_, Guid roomTypeId) = await factory.CreateHotelWithRoomTypeAsync();
+        DateOnly checkIn = Today.AddDays(10);
+        await LoadInventoryAsync(roomTypeId, checkIn, checkIn.AddDays(1), price: 100m);
+        string guestName = $"Ana {NewToken()}";
+        BookingResponse earlier = await CreateBookingAsync(
+            NewBookingRequest(roomTypeId, checkIn, checkIn.AddDays(1), quotedTotal: 100m, leadGuestName: guestName));
+        BookingResponse later = await CreateBookingAsync(
+            NewBookingRequest(roomTypeId, checkIn.AddDays(1), checkIn.AddDays(2), quotedTotal: 100m, leadGuestName: guestName));
+
+        PagedResponse<BookingListItemResponse> page = await SearchAsync($"search={guestName}&sort=-checkIn");
+
+        Assert.Equal([later.Id, earlier.Id], page.Items.Select(booking => booking.Id));
+    }
+
+    [Theory]
+    [InlineData("status=Pending")]
+    [InlineData("sort=leadGuestName")]
+    [InlineData("checkIn=not-a-date")]
+    public async Task Search_WithInvalidQuery_Returns400(string query)
+    {
+        HttpResponseMessage response = await _client.GetAsync($"{BOOKINGS_URL}?{query}", Cancellation);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     private static CreateBookingRequest NewBookingRequest(
         Guid roomTypeId,
         DateOnly checkIn,
         DateOnly checkOut,
         decimal quotedTotal,
-        int rooms = 1) =>
+        int rooms = 1,
+        string leadGuestName = "Ana García") =>
         new(
             roomTypeId,
             checkIn,
@@ -161,7 +233,7 @@ public sealed class BookingsApiTests(BackofficeApiFactory factory)
             rooms,
             Adults: rooms,
             Children: 0,
-            LeadGuestName: "Ana García",
+            LeadGuestName: leadGuestName,
             Channel: "Agency",
             ClientName: "Viajes Sol y Mar",
             QuotedTotal: quotedTotal);
@@ -194,5 +266,16 @@ public sealed class BookingsApiTests(BackofficeApiFactory factory)
             Cancellation);
         Assert.NotNull(calendar);
         return Assert.Single(calendar.RoomTypes).Days.Select(day => day.BookedRooms).ToArray();
+    }
+
+    private static string NewToken() => Guid.NewGuid().ToString("N")[..12];
+
+    private async Task<PagedResponse<BookingListItemResponse>> SearchAsync(string query)
+    {
+        PagedResponse<BookingListItemResponse>? page = await _client.GetFromJsonAsync<PagedResponse<BookingListItemResponse>>(
+            $"{BOOKINGS_URL}?{query}",
+            Cancellation);
+        Assert.NotNull(page);
+        return page;
     }
 }

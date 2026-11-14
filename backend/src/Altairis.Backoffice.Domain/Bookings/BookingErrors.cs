@@ -75,4 +75,8 @@ public static class BookingErrors
     public static Error TooManyGuests(int rooms, int maxGuests) => Error.Validation(
         "booking.too_many_guests",
         $"En {rooms} habitaciones caben como máximo {maxGuests} personas.");
+
+    public static readonly Error StatusInvalid = Error.Validation(
+        "booking.status_invalid",
+        "El estado de la reserva no es válido.");
 }
