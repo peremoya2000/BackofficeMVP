@@ -4,6 +4,7 @@ import { rxResource, takeUntilDestroyed, toSignal } from '@angular/core/rxjs-int
 import { FormBuilder, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -20,6 +21,9 @@ import { PagedResponse } from '../../../core/http/paged-response';
 import { toIsoDate } from '../../../shared/dates/iso-date';
 import { LoadError } from '../../../shared/load-error/load-error';
 import { PageHeader } from '../../../shared/page-header/page-header';
+import { BookingCreateDialogData } from '../booking-create-dialog/booking-create-dialog';
+import { BookingCreateLauncher } from '../booking-create-dialog/booking-create-launcher';
+import { BookingHotelPickerDialog } from '../booking-hotel-picker-dialog/booking-hotel-picker-dialog';
 import { BookingStatusChip } from '../booking-status-chip/booking-status-chip';
 import { BookingListItemResponse } from '../data/booking-list-item-response';
 import { BookingSearchRequest } from '../data/booking-search-request';
@@ -59,6 +63,8 @@ export class BookingListPage {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly bookingsApi = inject(BookingsApi);
+  private readonly dialog = inject(MatDialog);
+  private readonly bookingCreateLauncher = inject(BookingCreateLauncher);
 
   protected readonly displayedColumns = [
     'reference',
@@ -126,6 +132,15 @@ export class BookingListPage {
 
   protected showDeparturesToday(): void {
     this.navigate({ status: 'Confirmed', checkIn: undefined, checkOut: toIsoDate(startOfToday()), page: 1 });
+  }
+
+  protected openCreate(): void {
+    this.dialog
+      .open<BookingHotelPickerDialog, void, BookingCreateDialogData>(BookingHotelPickerDialog)
+      .afterClosed()
+      .subscribe((data) => {
+        if (data) this.bookingCreateLauncher.open(data);
+      });
   }
 
   protected clearFilters(): void {

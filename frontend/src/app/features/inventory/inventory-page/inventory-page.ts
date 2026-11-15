@@ -21,11 +21,7 @@ import { map } from 'rxjs';
 import { toIsoDate } from '../../../shared/dates/iso-date';
 import { LoadError } from '../../../shared/load-error/load-error';
 import { PageHeader } from '../../../shared/page-header/page-header';
-import {
-  BookingCreateDialog,
-  BookingCreateDialogData,
-} from '../../bookings/booking-create-dialog/booking-create-dialog';
-import { BookingResponse } from '../../bookings/data/booking-response';
+import { BookingCreateLauncher } from '../../bookings/booking-create-dialog/booking-create-launcher';
 import { InventoryApi } from '../data/inventory-api';
 import { InventoryCalendarResponse } from '../data/inventory-calendar-response';
 import { InventoryDayResponse } from '../data/inventory-day-response';
@@ -78,6 +74,7 @@ export class InventoryPage {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   private readonly inventoryApi = inject(InventoryApi);
+  private readonly bookingCreateLauncher = inject(BookingCreateLauncher);
 
   readonly id = input.required<string>();
 
@@ -170,23 +167,10 @@ export class InventoryPage {
     const calendar = this.shownCalendar();
     if (!calendar) return;
 
-    const data: BookingCreateDialogData = {
+    this.bookingCreateLauncher.open({
       hotelName: calendar.hotelName,
       roomTypes: roomTypeOptions(calendar),
-    };
-
-    this.dialog
-      .open<BookingCreateDialog, BookingCreateDialogData, BookingResponse>(BookingCreateDialog, {
-        data,
-      })
-      .afterClosed()
-      .subscribe((booking) => {
-        if (!booking) return;
-        this.snackBar.open(`Reserva ${booking.reference} confirmada.`, 'Cerrar', {
-          duration: SNACK_BAR_DURATION_MS,
-        });
-        this.router.navigate(['/bookings', booking.id]);
-      });
+    });
   }
 
   private showFrom(from: Date): void {

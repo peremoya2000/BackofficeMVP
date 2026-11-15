@@ -1,0 +1,44 @@
+<h2 mat-dialog-title>Nueva reserva</h2>
+
+<mat-dialog-content class="content">
+  <mat-form-field class="field">
+    <mat-label>Hotel</mat-label>
+    <input
+      matInput
+      [formControl]="hotel"
+      [matAutocomplete]="hotels"
+      placeholder="p. ej. Magnolia"
+    />
+    <mat-autocomplete #hotels="matAutocomplete" [displayWith]="hotelName">
+      @for (option of options(); track option.id) {
+        <mat-option [value]="option">
+          {{ option.name }}
+          <span class="place">· {{ option.city }} ({{ option.countryCode }})</span>
+        </mat-option>
+      }
+    </mat-autocomplete>
+    <mat-hint>Busca por nombre o ciudad, al menos 2 letras.</mat-hint>
+  </mat-form-field>
+
+  @if (suggestions.error(); as error) {
+    <app-load-error [error]="error" (retry)="suggestions.reload()" />
+  } @else if (roomTypes.error(); as error) {
+    <app-load-error [error]="error" (retry)="roomTypes.reload()" />
+  } @else if (roomTypes.isLoading()) {
+    <mat-progress-bar mode="indeterminate" />
+  } @else if (roomTypes.hasValue() && roomTypeOptions().length === 0) {
+    <p class="message">Este hotel aún no tiene tipos de habitación.</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button matButton type="button" mat-dialog-close>Cancelar</button>
+  <button
+    matButton="filled"
+    type="button"
+    [disabled]="roomTypeOptions().length === 0"
+    (click)="continue()"
+  >
+    Continuar
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,13 @@
+.content {
+  width: min(480px, 80vw);
+}
+
+.field {
+  width: 100%;
+  padding-top: 8px;
+}
+
+.place,
+.message {
+  color: var(--mat-sys-on-surface-variant);
+}

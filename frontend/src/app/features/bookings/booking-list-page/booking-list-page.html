@@ -7,6 +7,10 @@
     <mat-icon>logout</mat-icon>
     Salidas hoy
   </button>
+  <button matButton="filled" type="button" (click)="openCreate()">
+    <mat-icon>add</mat-icon>
+    Nueva reserva
+  </button>
 </app-page-header>
 
 <form class="filters" [formGroup]="filters">

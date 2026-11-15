@@ -31,7 +31,7 @@
 
   <mat-form-field>
     <mat-label>País (código ISO)</mat-label>
-    <input matInput formControlName="countryCode" maxlength="2" placeholder="ES" />
+    <input matInput formControlName="countryCode" maxlength="2" placeholder="p. ej. ES" />
     <mat-hint>{{ form.controls.countryCode.value | countryName }}</mat-hint>
     <mat-error>
       @if (form.controls.countryCode.hasError('required')) {
