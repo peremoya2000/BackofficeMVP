@@ -62,7 +62,7 @@
                   >
                     @if (cell.day; as day) {
                       <span class="cell__rooms">{{ cell.available }}/{{ day.totalRooms }}</span>
-                      <span>{{ day.price | currency: view.currency : 'symbol' : '1.0-0' }}</span>
+                      <span>{{ day.price | currency: view.currency : 'symbol' : (day.price % 1 === 0 ? '1.0-0' : '1.2-2') }}</span>
                     } @else {
                       —
                     }

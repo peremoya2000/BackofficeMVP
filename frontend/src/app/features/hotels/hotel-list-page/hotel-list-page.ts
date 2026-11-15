@@ -12,7 +12,7 @@ import { MatSortModule, Sort, SortDirection } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 import { debounceTime, map } from 'rxjs';
-import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '../../../core/http/paged-request';
+import { PAGE_SIZE_OPTIONS, readPaging } from '../../../core/http/paged-request';
 import { PagedResponse } from '../../../core/http/paged-response';
 import { CountryNamePipe } from '../../../shared/countries/country-name-pipe';
 import { LoadError } from '../../../shared/load-error/load-error';
@@ -136,8 +136,7 @@ export class HotelListPage {
 function readSearchRequest(params: ParamMap): HotelSearchRequest {
   const stars = params.get('stars');
   return {
-    page: Number(params.get('page') ?? 1),
-    pageSize: Number(params.get('pageSize') ?? DEFAULT_PAGE_SIZE),
+    ...readPaging(params),
     sort: params.get('sort') ?? undefined,
     search: params.get('search') ?? undefined,
     countryCode: params.get('countryCode') ?? undefined,
