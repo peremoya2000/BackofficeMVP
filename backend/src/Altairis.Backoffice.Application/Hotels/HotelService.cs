@@ -19,8 +19,8 @@ internal sealed class HotelService(IBackofficeDbContext dbContext, TimeProvider 
         {
             string pattern = LikePattern.Containing(request.Search.Trim());
             hotels = hotels.Where(hotel =>
-                EF.Functions.ILike(hotel.Name, pattern, LikePattern.ESCAPE_CHARACTER)
-                || EF.Functions.ILike(hotel.City, pattern, LikePattern.ESCAPE_CHARACTER));
+                EF.Functions.ILike(SearchText.Unaccent(hotel.Name), SearchText.Unaccent(pattern), LikePattern.ESCAPE_CHARACTER)
+                || EF.Functions.ILike(SearchText.Unaccent(hotel.City), SearchText.Unaccent(pattern), LikePattern.ESCAPE_CHARACTER));
         }
 
         if (!string.IsNullOrWhiteSpace(request.CountryCode))

@@ -25,8 +25,8 @@ internal sealed class BookingService(IBackofficeDbContext dbContext, TimeProvide
             string pattern = LikePattern.Containing(request.Search.Trim());
             bookings = bookings.Where(booking =>
                 EF.Functions.ILike(booking.Reference, pattern, LikePattern.ESCAPE_CHARACTER)
-                || EF.Functions.ILike(booking.LeadGuestName, pattern, LikePattern.ESCAPE_CHARACTER)
-                || EF.Functions.ILike(booking.ClientName, pattern, LikePattern.ESCAPE_CHARACTER));
+                || EF.Functions.ILike(SearchText.Unaccent(booking.LeadGuestName), SearchText.Unaccent(pattern), LikePattern.ESCAPE_CHARACTER)
+                || EF.Functions.ILike(SearchText.Unaccent(booking.ClientName), SearchText.Unaccent(pattern), LikePattern.ESCAPE_CHARACTER));
         }
 
         if (request.Status is not null)

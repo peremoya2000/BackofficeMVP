@@ -210,6 +210,22 @@ public sealed class BookingsApiTests(BackofficeApiFactory factory)
     }
 
     [Fact]
+    public async Task Search_ByGuestName_IgnoresAccents()
+    {
+        (_, Guid roomTypeId) = await factory.CreateHotelWithRoomTypeAsync();
+        DateOnly checkIn = Today.AddDays(10);
+        await LoadInventoryAsync(roomTypeId, checkIn, checkIn.AddDays(1), price: 100m);
+        string token = NewToken();
+        BookingResponse booking = await CreateBookingAsync(
+            NewBookingRequest(roomTypeId, checkIn, checkIn.AddDays(1), quotedTotal: 100m, leadGuestName: $"Lucía Núñez {token}"));
+
+        PagedResponse<BookingListItemResponse> page = await SearchAsync($"search=lucia nunez {token}");
+
+        BookingListItemResponse match = Assert.Single(page.Items);
+        Assert.Equal(booking.Id, match.Id);
+    }
+
+    [Fact]
     public async Task Search_SortsByCheckInDescending()
     {
         (_, Guid roomTypeId) = await factory.CreateHotelWithRoomTypeAsync();

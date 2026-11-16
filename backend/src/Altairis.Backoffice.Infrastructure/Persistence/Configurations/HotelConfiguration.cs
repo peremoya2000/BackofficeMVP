@@ -22,8 +22,6 @@ internal sealed class HotelConfiguration : IEntityTypeConfiguration<Hotel>
             .WithOne()
             .HasForeignKey(roomType => roomType.HotelId);
 
-        builder.HasIndex(hotel => hotel.Name).IsTrigramIndex();
-        builder.HasIndex(hotel => hotel.City).IsTrigramIndex();
         builder.HasIndex(hotel => hotel.CountryCode);
     }
 }

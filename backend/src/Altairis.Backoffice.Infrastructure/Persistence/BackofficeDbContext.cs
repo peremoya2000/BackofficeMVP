@@ -24,6 +24,8 @@ public sealed class BackofficeDbContext(DbContextOptions<BackofficeDbContext> op
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresExtension("pg_trgm");
+        modelBuilder.HasPostgresExtension("unaccent");
+        modelBuilder.HasDbFunction(() => SearchText.Unaccent(default!)).HasName("immutable_unaccent");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(BackofficeDbContext).Assembly);
     }
 }

@@ -22,6 +22,7 @@ namespace Altairis.Backoffice.Infrastructure.Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "unaccent");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Altairis.Backoffice.Domain.Bookings.Booking", b =>
@@ -200,20 +201,8 @@ namespace Altairis.Backoffice.Infrastructure.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_hotels");
 
-                    b.HasIndex("City")
-                        .HasDatabaseName("ix_hotels_city");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("City"), "gin");
-                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("City"), new[] { "gin_trgm_ops" });
-
                     b.HasIndex("CountryCode")
                         .HasDatabaseName("ix_hotels_country_code");
-
-                    b.HasIndex("Name")
-                        .HasDatabaseName("ix_hotels_name");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Name"), "gin");
-                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("Name"), new[] { "gin_trgm_ops" });
 
                     b.ToTable("hotels", (string)null);
                 });

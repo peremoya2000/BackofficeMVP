@@ -68,6 +68,20 @@ public sealed class HotelsApiTests(BackofficeApiFactory factory)
         Assert.Equal(new[] { byName.Id, byCity.Id }.Order(), page.Items.Select(hotel => hotel.Id).Order());
     }
 
+    [Theory]
+    [InlineData("Ávila", "avila")]
+    [InlineData("Avila", "ÁVILA")]
+    public async Task Search_MatchesNameOrCityIgnoringAccents(string stored, string searched)
+    {
+        string token = NewToken();
+        HotelResponse byName = await CreateHotelAsync(NewHotelRequest(name: $"Hotel {stored} {token}"));
+        HotelResponse byCity = await CreateHotelAsync(NewHotelRequest(city: $"{stored} {token}"));
+
+        PagedResponse<HotelListItemResponse> page = await SearchAsync($"search={searched} {token}");
+
+        Assert.Equal(new[] { byName.Id, byCity.Id }.Order(), page.Items.Select(hotel => hotel.Id).Order());
+    }
+
     [Fact]
     public async Task Search_TreatsLikeWildcardsAsLiteralText()
     {
