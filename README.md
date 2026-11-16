@@ -101,10 +101,10 @@ Desde `backend/`, con Docker en marcha:
 dotnet test
 ```
 
-136 tests:
+141 tests:
 
 - **Dominio** (unitarios): reglas de hoteles, tipos de habitación, estancias, importes, noches de inventario y reservas (presupuesto, alta y cancelación).
-- **Integración** (`WebApplicationFactory` + Testcontainers): la API completa contra un PostgreSQL 18 desechable con los datos de ejemplo. Cubre la búsqueda y paginación de hoteles, los tipos de habitación, el inventario, las reservas (alta y cancelación moviendo el inventario, precio cambiado, cancelación doble, 10 reservas simultáneas por la última habitación) y el panel.
+- **Integración** (`WebApplicationFactory` + Testcontainers): la API completa contra un PostgreSQL 18 desechable con los datos de ejemplo. Cubre la búsqueda y paginación de hoteles, los tipos de habitación (incluidas dos altas simultáneas con el mismo nombre), el inventario, las reservas (alta y cancelación moviendo el inventario, precio cambiado, cancelación doble, 10 reservas simultáneas por la última habitación) y el panel.
 
 El frontend no tiene tests unitarios en este MVP.
 

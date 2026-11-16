@@ -82,17 +82,34 @@ public sealed class HotelsApiTests(BackofficeApiFactory factory)
         Assert.Equal(new[] { byName.Id, byCity.Id }.Order(), page.Items.Select(hotel => hotel.Id).Order());
     }
 
-    [Fact]
-    public async Task Search_TreatsLikeWildcardsAsLiteralText()
+    [Theory]
+    [InlineData("_")]
+    [InlineData("%")]
+    [InlineData(@"\")]
+    public async Task Search_TreatsLikeSpecialCharactersAsLiteralText(string special)
     {
         string token = NewToken();
-        HotelResponse literalUnderscore = await CreateHotelAsync(NewHotelRequest(name: $"Hotel {token}_A"));
+        HotelResponse literal = await CreateHotelAsync(NewHotelRequest(name: $"Hotel {token}{special}A"));
         await CreateHotelAsync(NewHotelRequest(name: $"Hotel {token}ZA"));
 
-        PagedResponse<HotelListItemResponse> page = await SearchAsync($"search={token}_a");
+        PagedResponse<HotelListItemResponse> page = await SearchAsync($"search={Uri.EscapeDataString($"{token}{special}a")}");
 
         HotelListItemResponse match = Assert.Single(page.Items);
-        Assert.Equal(literalUnderscore.Id, match.Id);
+        Assert.Equal(literal.Id, match.Id);
+    }
+
+    [Fact]
+    public async Task Search_FiltersByCountryIgnoringCaseAndByStars()
+    {
+        string token = NewToken();
+        HotelResponse match = await CreateHotelAsync(NewHotelRequest(name: $"Hotel {token}", countryCode: "PT", stars: 4));
+        await CreateHotelAsync(NewHotelRequest(name: $"Hotel {token}", countryCode: "ES", stars: 4));
+        await CreateHotelAsync(NewHotelRequest(name: $"Hotel {token}", countryCode: "PT", stars: 3));
+
+        PagedResponse<HotelListItemResponse> page = await SearchAsync($"search={token}&countryCode=pt&stars=4");
+
+        HotelListItemResponse found = Assert.Single(page.Items);
+        Assert.Equal(match.Id, found.Id);
     }
 
     [Fact]
@@ -122,8 +139,9 @@ public sealed class HotelsApiTests(BackofficeApiFactory factory)
     private static CreateHotelRequest NewHotelRequest(
         string name = "Hotel de prueba",
         string city = "Palma",
-        string countryCode = "ES") =>
-        new(name, Stars: 3, Address: "Calle de prueba 1", city, countryCode, ContactEmail: null, ContactPhone: null);
+        string countryCode = "ES",
+        int stars = 3) =>
+        new(name, stars, Address: "Calle de prueba 1", city, countryCode, ContactEmail: null, ContactPhone: null);
 
     private static string NewToken() => Guid.NewGuid().ToString("N")[..12];
 

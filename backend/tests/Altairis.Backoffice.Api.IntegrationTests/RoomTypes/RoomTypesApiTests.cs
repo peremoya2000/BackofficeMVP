@@ -48,6 +48,20 @@ public sealed class RoomTypesApiTests(BackofficeApiFactory factory)
     }
 
     [Fact]
+    public async Task Create_WhenManyRequestsRaceForTheSameName_CreatesOnlyOne()
+    {
+        const int REQUESTS = 10;
+        (Guid hotelId, _) = await factory.CreateHotelWithRoomTypeAsync();
+        CreateRoomTypeRequest request = new("Suite Junior", "Suite", 3);
+
+        HttpResponseMessage[] responses = await Task.WhenAll(
+            Enumerable.Range(0, REQUESTS).Select(_ => _client.PostAsJsonAsync(RoomTypesUrl(hotelId), request, Cancellation)));
+
+        Assert.Single(responses, response => response.StatusCode == HttpStatusCode.Created);
+        Assert.Equal(REQUESTS - 1, responses.Count(response => response.StatusCode == HttpStatusCode.Conflict));
+    }
+
+    [Fact]
     public async Task Create_WithUnknownCategory_Returns400()
     {
         (Guid hotelId, _) = await factory.CreateHotelWithRoomTypeAsync();

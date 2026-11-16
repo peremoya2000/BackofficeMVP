@@ -260,6 +260,7 @@ public sealed class BookingsApiTests(BackofficeApiFactory factory)
 
     [Theory]
     [InlineData("status=Pending")]
+    [InlineData("status=5")]
     [InlineData("sort=leadGuestName")]
     [InlineData("checkIn=not-a-date")]
     public async Task Search_WithInvalidQuery_Returns400(string query)

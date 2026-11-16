@@ -31,7 +31,7 @@ internal sealed class BookingService(IBackofficeDbContext dbContext, TimeProvide
 
         if (request.Status is not null)
         {
-            if (!Enum.TryParse(request.Status, out BookingStatus status)) return BookingErrors.StatusInvalid;
+            if (!Enum.TryParse(request.Status, out BookingStatus status) || !Enum.IsDefined(status)) return BookingErrors.StatusInvalid;
             bookings = bookings.Where(booking => booking.Status == status);
         }
 
